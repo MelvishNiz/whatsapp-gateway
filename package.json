@@ -1,0 +1,25 @@
+{
+  "name": "whatsapp-gateway",
+  "version": "1.0.0",
+  "description": "WhatsApp Gateway",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "token-create": "node ./utils/generateToken.js",
+    "pm2-start": "pm2 start ecosystem.config.cjs",
+    "pm2-stop": "pm2 stop whatsapp-gateway",
+    "pm2-delete": "pm2 delete whatsapp-gateway",
+    "pm2-restart": "pm2 restart whatsapp-gateway",
+    "pm2-reload": "pm2 reload whatsapp-gateway"
+  },
+  "author": "Bintang Teknologi Solusindo (BTS)",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
+  }
+}
