@@ -30,6 +30,11 @@ HEADLESS=true # default true
 ACCESS_TOKEN=
 ```
 
+## Generate ``ACCESS_TOKEN``
+```bash
+npm run token-generate
+```
+
 ## Running local
 - With npm
 
@@ -65,6 +70,7 @@ running scripts
 ```
 
 ## API Reference
+- Headers
 | Header | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `ACCESS_TOKEN` | `string` | **Required**. Your ACCESS_TOKEN |
@@ -73,6 +79,7 @@ running scripts
 ```http
   POST /api/status
 ```
+- response
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -88,6 +95,7 @@ running scripts
 ```http
   POST /api/initialize
 ```
+- response
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -96,6 +104,7 @@ running scripts
 ```http
   POST /api/logout
 ```
+- response
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -104,6 +113,7 @@ running scripts
 ```http
   POST /api/restart
 ```
+- response
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
