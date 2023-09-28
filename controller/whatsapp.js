@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { client } from "../utils/whatsAppClient.js";
+import { client } from "../utils/whatsapp-client.js";
 
 export const status = (req, res) => {
   try {

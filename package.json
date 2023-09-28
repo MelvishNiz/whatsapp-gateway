@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "token-generate": "node ./utils/generateToken.js",
+    "token-generate": "node ./utils/token-generate.js",
     "pm2-start": "pm2 start ecosystem.config.cjs",
     "pm2-stop": "pm2 stop whatsapp-gateway",
     "pm2-delete": "pm2 delete whatsapp-gateway",
