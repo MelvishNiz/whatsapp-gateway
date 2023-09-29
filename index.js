@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from "express";
+import helmet from "helmet";
 
 import apiRoutes from './routes/api.js';
 import log from './middleware/log.js';
@@ -7,6 +8,7 @@ import log from './middleware/log.js';
 
 // init express
 const app = express();
+app.use(helmet());
 app.use(express.json());
 app.use(log);
 
