@@ -126,6 +126,8 @@
       if(client_id){
         document.getElementById('client_id').innerHTML = client_id;
         subscribe(client_id);
+      }else if(data.log){
+        responseLogEl.innerHTML += `${data.log}\n`;
       }else{
         console.log(data.message)
         qrcode.makeCode(data.qr_code.toString());

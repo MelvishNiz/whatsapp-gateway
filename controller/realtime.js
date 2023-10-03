@@ -64,6 +64,15 @@ export const writeStreamData = () => {
   });
 }
 
+export const writeLog = (message) => {
+  clients.forEach(client => {
+    if(subscribers.includes(client.id)){
+      client.res.write(`event: message\n`);
+      client.res.write(`data: ${JSON.stringify({log: message})}\n\n`);
+    }
+  });
+}
+
 const getData = () => {
   return {
     message: process.env.WA_STATE == "READY" ? "Client is ready" : "Client is not ready",
