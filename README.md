@@ -132,3 +132,17 @@ running scripts
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
+
+#### Realtime Status (PUBLIC)
+```http
+  SSE (GET) /sse/realtime
+```
+
+#### Realtime Status Subscribe (PRIVATE WITH TOKEN)
+```http
+  POST /sse/subscribe
+```
+- body
+| body | type     | example |
+| :-------- | :------- | :------- |
+| `client_id` | `string` | `client_id` from /sse/realtime  |

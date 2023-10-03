@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { client } from "../utils/whatsapp-client.js";
+import { writeStreamData } from '../controller/realtime.js';
 
 export const status = (req, res) => {
   try {
@@ -41,6 +42,8 @@ export const logout = (req, res) => {
     process.env.WA_AUTH  = false;
     process.env.WA_STATE = "NOT_READY";
     process.env.WA_QR_CODE = "";
+    process.env.WA_QR_CODE_COUNTER = 0;
+    writeStreamData();
     return res.status(200).send({
       message: "Success Logout",
     });
@@ -75,7 +78,6 @@ export const sendMessage = (req, res) => {
     client.sendMessage(`${to}@c.us`, message);
     return res.status(200).send({
       status: "success",
-     
     });
   } catch (error) {
     return res.status(500).send({

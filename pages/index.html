@@ -1,0 +1,299 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Gateway Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    td {
+      padding: 5px;
+    }
+  </style>
+</head>
+<body class="bg-[#e6e9eb] h-screen relative">
+  <input id="access-token" type="hidden" value="<%= token %>" />
+
+  <div class="bg-[#00a884] h-[222px]"></div>
+  <div class="absolute top-0 left-0 bottom-0 right-0 h-full flex items-center justify-center">
+    <div class="bg-white rounded-md w-[90%] h-[95%] shadow-md flex">
+      <div class="w-full h-full border-r flex flex-col gap-y-2 items-center justify-center">
+        <!-- QR CODE -->
+        <div class="flex gap-x-10">
+          <div class="relative">
+            <span id="qrcode_counter" class="absolute top-0 right-0 -translate-y-2 translate-x-2 rounded-full bg-green-500 text-white font-bold w-8 h-8 flex flex-col items-center justify-center"></span>
+            <div id="qrcode" class="border-2 border-gray-300 p-7 rounded-md shadow-lg"></div>
+          </div>
+          <div class="flex flex-col gap-y-3 justify-center">
+            <button id="button-restart" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold">Restart</button>
+            <button id="button-initialize" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">Initialize</button>
+            <button id="button-logout" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">logout</button>
+            <button id="button-test-send-message" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">Test Send Message</button>
+            <a href="https://git.bintangtechnology.com/microservices/whatsapp-gateway#api-reference" target="_blank" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold">API Documentation</a>
+          </div>
+        </div>
+        <table class="overflow-hidden text-ellipsis">
+          <tr>
+            <td class="font-bold">ACCESS_TOKEN</td>
+            <td>:</td>
+            <td class="font-bold"><%= token %></td>
+          </tr>
+          <tr>
+            <td class="font-bold">client_id</td>
+            <td>:</td>
+            <td id="client_id"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">Name</td>
+            <td>:</td>
+            <td id="user_name" class="font-semibold text-white"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">Phone Number</td>
+            <td>:</td>
+            <td id="phone_number" class="font-semibold text-white"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">message</td>
+            <td>:</td>
+            <td id="message" class="font-semibold text-white uppercase"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">state</td>
+            <td>:</td>
+            <td id="state" class="font-semibold text-white uppercase"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">is_initialize</td>
+            <td>:</td>
+            <td id="is_initialize" class="font-semibold text-white uppercase"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">is_auth</td>
+            <td>:</td>
+            <td id="is_auth" class="font-semibold text-white uppercase"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">is_loading</td>
+            <td>:</td>
+            <td id="is_loading" class="font-semibold text-white uppercase"></td>
+          </tr>
+          <tr>
+            <td class="font-bold">is_ready</td>
+            <td>:</td>
+            <td id="is_ready" class="font-semibold text-white uppercase"></td>
+          </tr>
+        </table>
+      </div>
+      <textarea id="response-log" class="w-[300px] resize-none focus-visible:outline-none p-2" readonly></textarea>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script src="/js/axios.min.js"></script>
+  <script src="/js/eventsource-polyfill.js"></script>
+  <script src="/js/qrcode.min.js"></script>
+  <script>
+    const AccessToken = document.getElementById('access-token').value;
+  </script>
+  <script>
+    let currentPhoneNumber = "";
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+      text: "",
+      width: 256,
+      height: 256,
+      colorDark : "#000000",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+    });
+    const subscribe = async (clientId) => {
+      await axios({
+        method: "POST",
+        url: "/sse/subscribe",
+        headers: {
+          "ACCESS_TOKEN" : AccessToken
+        },
+        data: {
+          client_id: clientId
+        }
+      });
+    };
+
+    let es = new EventSource('/sse/realtime');
+    es.addEventListener('message', function(event){
+      let data = JSON.parse(event.data);
+      let client_id = data.client_id;
+      if(client_id){
+        document.getElementById('client_id').innerHTML = client_id;
+        subscribe(client_id);
+      }else{
+        console.log(data.message)
+        qrcode.makeCode(data.qr_code.toString());
+        document.getElementById('qrcode_counter').innerHTML = data.qr_counter;
+        document.getElementById('message').innerHTML = data.message;
+        document.getElementById('state').innerHTML = data.state;
+        document.getElementById('is_initialize').innerHTML = data.is_initialize;
+        document.getElementById('is_auth').innerHTML = data.is_auth;
+        document.getElementById('is_loading').innerHTML = data.is_loading;
+        document.getElementById('is_ready').innerHTML = data.is_ready;
+        if(data.is_auth){
+          document.getElementById('user_name').innerHTML = data.client_info?.pushname || null;
+          document.getElementById('phone_number').innerHTML = data.client_info?.me?.user || null;
+          currentPhoneNumber = data.client_info?.me?.user ? data.client_info?.me?.user : false;
+        }
+
+        // css
+        if(data.client_info?.pushname != null && data.is_auth){
+          document.getElementById('user_name').classList.remove("bg-red-500")
+          document.getElementById('user_name').classList.add("bg-green-500")
+        }else{
+          document.getElementById('user_name').classList.remove("bg-green-500")
+          document.getElementById('user_name').classList.add("bg-red-500")
+        }
+
+        if(data.client_info?.me?.user != null && data.is_auth){
+          document.getElementById('phone_number').classList.remove("bg-red-500")
+          document.getElementById('phone_number').classList.add("bg-green-500")
+        }else{
+          document.getElementById('phone_number').classList.remove("bg-green-500")
+          document.getElementById('phone_number').classList.add("bg-red-500")
+        }
+
+        if(data.message == "Client is ready"){
+          document.getElementById('message').classList.remove("bg-red-500")
+          document.getElementById('message').classList.add("bg-green-500")
+        }else{
+          document.getElementById('message').classList.remove("bg-green-500")
+          document.getElementById('message').classList.add("bg-red-500")
+        }
+
+        if(data.state == "READY"){
+          document.getElementById('state').classList.remove("bg-red-500")
+          document.getElementById('state').classList.add("bg-green-500")
+        }else{
+          document.getElementById('state').classList.remove("bg-green-500")
+          document.getElementById('state').classList.add("bg-red-500")
+        }
+
+        if(data.is_initialize){
+          document.getElementById('is_initialize').classList.remove("bg-red-500")
+          document.getElementById('is_initialize').classList.add("bg-green-500")
+        }else{
+          document.getElementById('is_initialize').classList.remove("bg-green-500")
+          document.getElementById('is_initialize').classList.add("bg-red-500")
+        }
+
+        if(data.is_auth){
+          document.getElementById('is_auth').classList.remove("bg-red-500")
+          document.getElementById('is_auth').classList.add("bg-green-500")
+        }else{
+          document.getElementById('is_auth').classList.remove("bg-green-500")
+          document.getElementById('is_auth').classList.add("bg-red-500")
+        }
+
+        if(!data.is_loading){
+          document.getElementById('is_loading').classList.remove("bg-red-500")
+          document.getElementById('is_loading').classList.add("bg-green-500")
+        }else{
+          document.getElementById('is_loading').classList.remove("bg-green-500")
+          document.getElementById('is_loading').classList.add("bg-red-500")
+        }
+
+        if(data.is_ready){
+          document.getElementById('is_ready').classList.remove("bg-red-500")
+          document.getElementById('is_ready').classList.add("bg-green-500")
+        }else{
+          document.getElementById('is_ready').classList.remove("bg-green-500")
+          document.getElementById('is_ready').classList.add("bg-red-500")
+        }
+
+        // Handle Button
+        document.getElementById('button-initialize').disabled = data.is_initialize;
+        document.getElementById('button-logout').disabled = !data.is_auth;
+        document.getElementById('button-test-send-message').disabled = !data.is_ready;
+      }
+    });
+    es.addEventListener("open", (event) => {
+      console.log("The connection has been established.");
+    });
+    es.addEventListener("error", (e) => {
+      console.log("An error occurred while attempting to connect.");
+    });
+  </script>
+
+  <!-- Button Action -->
+  <script>
+    const restartButton = document.getElementById('button-restart');
+    const initializeButton = document.getElementById('button-initialize');
+    const logoutButton = document.getElementById('button-logout');
+    const testSendMessageButton = document.getElementById('button-test-send-message');
+    const responseLogEl = document.getElementById('response-log');
+
+    restartButton.addEventListener('click', async () => {
+      console.log("Restarting")
+      axios({
+        method: "POST",
+        url: "/api/restart",
+        headers: {
+          "ACCESS_TOKEN" : AccessToken
+        },
+      }).then((response)=>{
+        responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+      }).catch((error)=>{
+        responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+      });
+    })
+    initializeButton.addEventListener('click', () => {
+      console.log("Initialize Whatsapp")
+      axios({
+        method: "POST",
+        url: "/api/initialize",
+        headers: {
+          "ACCESS_TOKEN" : AccessToken
+        },
+      }).then((response)=>{
+        responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+      }).catch((error)=>{
+        responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+      });
+    })
+    logoutButton.addEventListener('click', () => {
+      console.log("Logging out");
+      axios({
+        method: "POST",
+        url: "/api/logout",
+        headers: {
+          "ACCESS_TOKEN" : AccessToken
+        },
+      }).then((response)=>{
+        responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+      }).catch((error)=>{
+        responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+      });
+    })
+    testSendMessageButton.addEventListener('click', () => {
+      console.log("Testing Send Message");
+      console.log(currentPhoneNumber);
+      if(currentPhoneNumber){
+        axios({
+          method: "POST",
+          url: "/api/send-message",
+          headers: {
+            "ACCESS_TOKEN" : AccessToken
+          },
+          data: {
+            to: currentPhoneNumber,
+            message: "Test Message"
+          }
+        }).then((response)=>{
+          responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+        }).catch((error)=>{
+          responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+        });
+      }else{
+        responseLogEl.innerHTML +=  `No Phone Number found please scan qr code\n`;
+      }
+    })
+  </script>
+</body>
+</html>
