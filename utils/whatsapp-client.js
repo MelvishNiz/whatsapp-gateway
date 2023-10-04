@@ -37,6 +37,10 @@ export const client = new Client(config);
 // init
 client.initialize();
 process.env.INITIALIZE = true;
+process.env.WA_AUTH  = false;
+process.env.WA_STATE = "NOT_READY";
+process.env.WA_QR_CODE = "";
+process.env.WA_QR_CODE_COUNTER = 0;
 process.env.IS_LOADING = true;
 writeStreamData();
 

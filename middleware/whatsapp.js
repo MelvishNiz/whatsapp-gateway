@@ -1,7 +1,9 @@
 export const ready = (req, res, next) => {
   if(process.env.AUTH != "NOT_READY" && process.env.WA_AUTH == "true" && process.env.INITIALIZE == "true" && req.url != "/initialize" || req.url == "/restart"){
     next()
-  }else if (req.url == "/initialize" && process.env.INITIALIZE == "false" || req.url == "/restart") {
+  }else if (process.env.INITIALIZE == "false" && req.url == "/initialize" || req.url == "/restart") {
+    next();
+  }else if(req.url == "/stop"){
     next();
   }else{
     return res.status(200).send({

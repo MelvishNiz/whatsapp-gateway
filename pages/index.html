@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WhatsApp Gateway Panel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -11,7 +10,7 @@
     }
   </style>
 </head>
-<body class="bg-[#e6e9eb] h-screen relative">
+<body class="bg-[#e6e9eb] h-screen relative min-w-[1100px]">
   <input id="access-token" type="hidden" value="<%= token %>" />
 
   <div class="bg-[#00a884] h-[222px]"></div>
@@ -25,9 +24,10 @@
             <div id="qrcode" class="border-2 border-gray-300 p-7 rounded-md shadow-lg"></div>
           </div>
           <div class="flex flex-col gap-y-3 justify-center">
-            <button id="button-restart" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold">Restart</button>
             <button id="button-initialize" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">Initialize</button>
-            <button id="button-logout" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">logout</button>
+            <button id="button-restart" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold">Restart</button>
+            <button id="button-stop" class="bg-red-500 text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">Stop</button>
+            <button id="button-logout" class="bg-red-500 text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">logout</button>
             <button id="button-test-send-message" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold disabled:bg-gray-200 duration-200">Test Send Message</button>
             <a href="https://git.bintangtechnology.com/microservices/whatsapp-gateway#api-reference" target="_blank" class="bg-[#00a884] text-white px-10 py-1 rounded-md text-lg font-bold">API Documentation</a>
           </div>
@@ -85,7 +85,7 @@
           </tr>
         </table>
       </div>
-      <textarea id="response-log" class="w-[300px] resize-none focus-visible:outline-none p-2" readonly></textarea>
+      <textarea id="response-log" class="w-[400px] p-2 resize-none focus-visible:outline-none uppercase font-bold text-xs rounded-md" readonly></textarea>
     </div>
   </div>
 
@@ -210,6 +210,7 @@
         }
 
         // Handle Button
+        document.getElementById('button-stop').disabled = !data.is_initialize || data.qr_code == "";
         document.getElementById('button-initialize').disabled = data.is_initialize;
         document.getElementById('button-logout').disabled = !data.is_auth;
         document.getElementById('button-test-send-message').disabled = !data.is_ready;
@@ -225,11 +226,27 @@
 
   <!-- Button Action -->
   <script>
+    const stopButton = document.getElementById('button-stop');
     const restartButton = document.getElementById('button-restart');
     const initializeButton = document.getElementById('button-initialize');
     const logoutButton = document.getElementById('button-logout');
     const testSendMessageButton = document.getElementById('button-test-send-message');
     const responseLogEl = document.getElementById('response-log');
+
+    stopButton.addEventListener('click', async () => {
+      console.log("Stoping Client")
+      axios({
+        method: "POST",
+        url: "/api/stop",
+        headers: {
+          "ACCESS_TOKEN" : AccessToken
+        },
+      }).then((response)=>{
+        responseLogEl.innerHTML += `${response.data.message}\n`;
+      }).catch((error)=>{
+        responseLogEl.innerHTML +=  `${error.response.data.message}\n`;
+      });
+    });
 
     restartButton.addEventListener('click', async () => {
       console.log("Restarting")
@@ -240,9 +257,9 @@
           "ACCESS_TOKEN" : AccessToken
         },
       }).then((response)=>{
-        responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+        responseLogEl.innerHTML += `${response.data.message}\n`;
       }).catch((error)=>{
-        responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+        responseLogEl.innerHTML +=  `${error.response.data.message}\n`;
       });
     })
     initializeButton.addEventListener('click', () => {
@@ -254,9 +271,9 @@
           "ACCESS_TOKEN" : AccessToken
         },
       }).then((response)=>{
-        responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+        responseLogEl.innerHTML += `${response.data.message}\n`;
       }).catch((error)=>{
-        responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+        responseLogEl.innerHTML +=  `${error.response.data.message}\n`;
       });
     })
     logoutButton.addEventListener('click', () => {
@@ -268,9 +285,9 @@
           "ACCESS_TOKEN" : AccessToken
         },
       }).then((response)=>{
-        responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+        responseLogEl.innerHTML += `${response.data.message}\n`;
       }).catch((error)=>{
-        responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+        responseLogEl.innerHTML +=  `${error.response.data.message}\n`;
       });
     })
     testSendMessageButton.addEventListener('click', () => {
@@ -288,9 +305,9 @@
             message: "Test Message"
           }
         }).then((response)=>{
-          responseLogEl.innerHTML += `${JSON.stringify(response.data)}\n`;
+          responseLogEl.innerHTML += `${response.data.message}\n`;
         }).catch((error)=>{
-          responseLogEl.innerHTML +=  `${JSON.stringify(error.response.data)}\n`;
+          responseLogEl.innerHTML +=  `${error.response.data.message}\n`;
         });
       }else{
         responseLogEl.innerHTML +=  `No Phone Number found please scan qr code\n`;

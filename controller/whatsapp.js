@@ -25,6 +25,12 @@ export const initialize = (req, res) => {
   try {
     client.initialize();
     process.env.INITIALIZE = true;
+    process.env.WA_AUTH  = false;
+    process.env.WA_STATE = "NOT_READY";
+    process.env.WA_QR_CODE = "";
+    process.env.WA_QR_CODE_COUNTER = 0;
+    process.env.IS_LOADING = true;
+    writeStreamData();
     return res.status(200).send({
       message: "Success Initialize",
     });
@@ -72,12 +78,36 @@ export const restart = (req, res) => {
   }
 };
 
+export const stop = (req, res) => {
+  try {
+    if(process.env.WA_QR_CODE){
+      client.destroy();
+    }else{
+      throw "Client not INITIALIZE";
+    }
+    process.env.INITIALIZE = false;
+    process.env.WA_QR_CODE = "";
+    process.env.WA_STATE = "NOT_READY";
+    process.env.WA_AUTH  = false;
+    process.env.IS_LOADING = false;
+    process.env.WA_QR_CODE_COUNTER = 0;
+    writeStreamData();
+    return res.status(200).send({
+      message: "Success Stop",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: error,
+    });
+  }
+}
+
 export const sendMessage = (req, res) => {
   try {
     let { to, message } = req.body;
     client.sendMessage(`${to}@c.us`, message);
     return res.status(200).send({
-      status: "success",
+      message: `message to ${to} data: ${message}`,
     });
   } catch (error) {
     return res.status(500).send({
