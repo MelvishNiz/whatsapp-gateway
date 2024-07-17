@@ -23,6 +23,6 @@
     "express-basic-auth": "^1.2.1",
     "express-validator": "^7.0.1",
     "helmet": "^7.0.0",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus"
   }
 }
