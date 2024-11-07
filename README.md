@@ -71,6 +71,7 @@ running scripts
 
 ## API Reference
 - Headers
+
 | Header | Type     | Description                |
 | :-------- | :------- | :------------------------- |
 | `ACCESS_TOKEN` | `string` | **Required**. Your ACCESS_TOKEN |
@@ -80,6 +81,7 @@ running scripts
   POST /api/status
 ```
 - response
+
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -96,6 +98,7 @@ running scripts
   POST /api/initialize
 ```
 - response
+
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -105,6 +108,7 @@ running scripts
   POST /api/logout
 ```
 - response
+
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -114,6 +118,7 @@ running scripts
   POST /api/restart
 ```
 - response
+
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -123,12 +128,14 @@ running scripts
   POST /api/send-message
 ```
 - body
+
 | body | type     | example |
 | :-------- | :------- | :------- |
 | `to`      | `number` | `621234567890` must include country code  |
 | `message` | `string` | `any` |
 
 - response
+
 | response | type     | description |
 | :-------- | :------- | :------- |
 | `message`      | `string` | message |
@@ -143,6 +150,7 @@ running scripts
   POST /sse/subscribe
 ```
 - body
+
 | body | type     | example |
 | :-------- | :------- | :------- |
 | `client_id` | `string` | `client_id` from /sse/realtime  |
